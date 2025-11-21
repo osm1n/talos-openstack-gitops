@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openstack-infra
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/osm1n/talos-openstack-gitops.git' # UPDATE THIS
+    targetRevision: HEAD
+    path: infrastructure
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: openstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
