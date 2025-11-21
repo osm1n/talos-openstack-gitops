@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rabbitmq
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://charts.bitnami.com/bitnami'
+    targetRevision: 12.0.0
+    chart: rabbitmq
+    helm:
+      parameters:
+        - name: persistence.storageClass
+          value: general
+        - name: persistence.size
+          value: 5Gi
+        - name: auth.username
+          value: openstack
+        - name: auth.password
+          value: password # CHANGE THIS LATER
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: openstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

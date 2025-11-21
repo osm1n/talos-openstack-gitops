@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mariadb
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://charts.bitnami.com/bitnami'
+    targetRevision: 16.0.1
+    chart: mariadb
+    helm:
+      parameters:
+        - name: primary.persistence.storageClass
+          value: general
+        - name: primary.persistence.size
+          value: 10Gi
+        - name: auth.rootPassword
+          value: password # CHANGE THIS LATER
+        - name: auth.database
+          value: openstack
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: openstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
