@@ -11,12 +11,16 @@ spec:
     chart: mariadb
     helm:
       parameters:
+        # --- ADD THIS TO FIX IMAGE ERROR ---
+        - name: image.tag
+          value: "11.3-debian-12"
+        # -----------------------------------
         - name: primary.persistence.storageClass
           value: general
         - name: primary.persistence.size
           value: 10Gi
         - name: auth.rootPassword
-          value: password # CHANGE THIS LATER
+          value: password
         - name: auth.database
           value: openstack
   destination:

@@ -11,6 +11,10 @@ spec:
     chart: rabbitmq
     helm:
       parameters:
+        # --- ADD THIS TO FIX IMAGE ERROR ---
+        - name: image.tag
+          value: "3.13-debian-12"
+        # -----------------------------------
         - name: persistence.storageClass
           value: general
         - name: persistence.size
@@ -18,7 +22,7 @@ spec:
         - name: auth.username
           value: openstack
         - name: auth.password
-          value: password # CHANGE THIS LATER
+          value: password
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: openstack
