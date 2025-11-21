@@ -3,8 +3,6 @@ kind: Application
 metadata:
   name: rook-ceph-cluster
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1"
 spec:
   project: default
   source:
@@ -21,9 +19,22 @@ spec:
           value: 'true'
         - name: cephClusterSpec.storage.useAllDevices
           value: 'true'
-        # Disable dashboard ingress for now to keep it simple
         - name: ingress.dashboard.enabled
           value: 'false'
+        # --- ADD THIS SECTION BELOW ---
+        # Reduce CPU requests to allow pods to schedule on smaller nodes
+        - name: cephClusterSpec.resources.mgr.requests.cpu
+          value: "100m"
+        - name: cephClusterSpec.resources.mgr.requests.memory
+          value: "512Mi"
+        - name: cephClusterSpec.resources.mon.requests.cpu
+          value: "100m"
+        - name: cephClusterSpec.resources.mon.requests.memory
+          value: "512Mi"
+        - name: cephClusterSpec.resources.osd.requests.cpu
+          value: "100m"
+        - name: cephClusterSpec.resources.osd.requests.memory
+          value: "1Gi"
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: rook-ceph
