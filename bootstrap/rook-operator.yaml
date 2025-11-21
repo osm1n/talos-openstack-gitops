@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rook-ceph-operator
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+spec:
+  project: default
+  source:
+    repoURL: 'https://charts.rook.io/release'
+    targetRevision: v1.14.3
+    chart: rook-ceph
+    helm:
+      parameters:
+        - name: crds.enabled
+          value: 'true'
+        # Talos specific: ensure CSI socket paths work
+        - name: csi.kubeletDirPath
+          value: /var/lib/kubelet
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: rook-ceph
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

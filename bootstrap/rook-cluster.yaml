@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rook-ceph-cluster
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  project: default
+  source:
+    repoURL: 'https://charts.rook.io/release'
+    targetRevision: v1.14.3
+    chart: rook-ceph-cluster
+    helm:
+      parameters:
+        - name: operatorNamespace
+          value: rook-ceph
+        - name: toolbox.enabled
+          value: 'true'
+        - name: cephClusterSpec.storage.useAllNodes
+          value: 'true'
+        - name: cephClusterSpec.storage.useAllDevices
+          value: 'true'
+        # Disable dashboard ingress for now to keep it simple
+        - name: ingress.dashboard.enabled
+          value: 'false'
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: rook-ceph
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
