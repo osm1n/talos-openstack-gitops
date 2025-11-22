@@ -1,0 +1,49 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: keystone
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://openstack-k8s-operators.github.io/openstack-helm-charts'
+    targetRevision: 0.2.6 # Using a specific stable version
+    chart: keystone
+    helm:
+      parameters:
+        # --- Database Connection ---
+        - name: conf.keystone.database.connection
+          value: mysql+pymysql://keystone:password@mariadb.openstack.svc.cluster.local/keystone
+        # --- RabbitMQ Connection ---
+        - name: conf.keystone.oslo_messaging_rabbit.transport_url
+          value: rabbit://openstack:password@rabbitmq.openstack.svc.cluster.local:5672/
+        # --- Memcached Connection ---
+        - name: conf.keystone.cache.backend
+          value: dogpile.cache.memcached
+        - name: conf.keystone.cache.memcache_servers
+          value: memcached.openstack.svc.cluster.local:11211
+        # --- Admin Token (Keep simple for lab) ---
+        - name: conf.keystone.DEFAULT.admin_token
+          value: password
+        # --- Bootstrap settings ---
+        - name: bootstrap.enabled
+          value: "true"
+        - name: bootstrap.script
+          value: |
+            keystone-manage db_sync
+            keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
+            keystone-manage credential_setup --keystone-user keystone --keystone-group keystone
+            keystone-manage bootstrap --bootstrap-password password \
+              --bootstrap-admin-url http://keystone-api.openstack.svc.cluster.local:5000/v3/ \
+              --bootstrap-internal-url http://keystone-api.openstack.svc.cluster.local:5000/v3/ \
+              --bootstrap-public-url http://keystone-api.openstack.svc.cluster.local:5000/v3/ \
+              --bootstrap-region-id RegionOne
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: openstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
