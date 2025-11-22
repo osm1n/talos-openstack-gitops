@@ -11,23 +11,25 @@ spec:
     chart: rabbitmq
     helm:
       parameters:
-        # --- MAIN IMAGE ---
+        # --- MAIN IMAGE (Use AWS Mirror) ---
         - name: image.registry
-          value: "docker.io"
+          value: "public.ecr.aws"
         - name: image.repository
           value: "bitnami/rabbitmq"
         - name: image.tag
           value: "latest"
-        # --- INIT CONTAINER IMAGE (ADD THIS) ---
+        
+        # --- INIT CONTAINER (Use AWS Mirror) ---
         - name: volumePermissions.enabled
           value: "true"
         - name: volumePermissions.image.registry
-          value: "docker.io"
+          value: "public.ecr.aws"
         - name: volumePermissions.image.repository
           value: "bitnami/os-shell"
         - name: volumePermissions.image.tag
           value: "latest"
-        # ---------------------------------------
+        
+        # --- STANDARD CONFIG ---
         - name: persistence.storageClass
           value: general
         - name: persistence.size
@@ -35,7 +37,8 @@ spec:
         - name: auth.username
           value: openstack
         - name: auth.password
-          value: password
+          value: password    
+
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: openstack
