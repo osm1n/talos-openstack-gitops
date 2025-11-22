@@ -11,7 +11,7 @@ spec:
     targetRevision: 2024.2.4
     helm:
       parameters:
-        # --- 1. FORCE JOB CREATION (Fixes "dependency not found") ---
+        # --- CRITICAL: Job Flags (Boolean without quotes sometimes matters in older charts) ---
         - name: manifests.job_db_init
           value: "true"
         - name: manifests.job_db_sync
@@ -22,8 +22,12 @@ spec:
           value: "true"
         - name: manifests.job_fernet_setup
           value: "true"
+        
+        # --- Image Repo Overrides (To prevent rate limits here too) ---
+        # OpenStack-Helm usually uses quay.io or docker.io. Let's be safe.
+        # We will stick to defaults for now unless we see ErrImagePull.
 
-        # --- 2. CONNECTIONS ---
+        # --- Connectivity ---
         - name: conf.keystone.database.connection
           value: mysql+pymysql://keystone:password@mariadb.openstack.svc.cluster.local/keystone
         - name: conf.keystone.oslo_messaging_rabbit.transport_url
@@ -35,36 +39,26 @@ spec:
         - name: conf.keystone.DEFAULT.admin_token
           value: password
 
-        # --- 3. LAB RESOURCE TUNING (Prevents "Pending" state) ---
+        # --- Resource Limits (VERY IMPORTANT) ---
         - name: pod.replicas.api
           value: "1"
+        # Force low resources for ALL jobs and pods
         - name: pod.resources.api.requests.memory
-          value: "512Mi"
+          value: "256Mi"
         - name: pod.resources.api.requests.cpu
-          value: "100m"
-        - name: pod.resources.api.limits.memory
-          value: "1024Mi"
-        - name: pod.resources.api.limits.cpu
-          value: "1000m"
-        # Reduce job resources too
+          value: "50m"
+        - name: pod.resources.jobs.db_init.requests.memory
+          value: "256Mi"
+        - name: pod.resources.jobs.db_init.requests.cpu
+          value: "50m"
+        - name: pod.resources.jobs.db_sync.requests.memory
+          value: "256Mi"
+        - name: pod.resources.jobs.db_sync.requests.cpu
+          value: "50m"
         - name: pod.resources.jobs.bootstrap.requests.memory
-          value: "128Mi"
+          value: "256Mi"
         - name: pod.resources.jobs.bootstrap.requests.cpu
-          value: "100m"
-
-        # --- 4. BOOTSTRAP SCRIPT ---
-        - name: bootstrap.enabled
-          value: "true"
-        - name: bootstrap.script
-          value: |
-            keystone-manage db_sync
-            keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
-            keystone-manage credential_setup --keystone-user keystone --keystone-group keystone
-            keystone-manage bootstrap --bootstrap-password password \
-              --bootstrap-admin-url http://keystone-api.openstack.svc.cluster.local:5000/v3/ \
-              --bootstrap-internal-url http://keystone-api.openstack.svc.cluster.local:5000/v3/ \
-              --bootstrap-public-url http://keystone-api.openstack.svc.cluster.local:5000/v3/ \
-              --bootstrap-region-id RegionOne
+          value: "50m"
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: openstack
