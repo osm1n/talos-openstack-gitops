@@ -7,14 +7,11 @@ spec:
   project: default
   source:
     repoURL: 'https://charts.bitnami.com/bitnami'
-    targetRevision: 14.0.0
+    targetRevision: 15.0.0 # <--- MAJOR UPGRADE (was 14.0.0)
     chart: rabbitmq
     helm:
       parameters:
-        # --- ADD THIS TO FIX IMAGE ERROR ---
-        - name: image.tag
-          value: "3.12-debian-11"
-        # -----------------------------------
+        # Remove the 'image.tag' override.
         - name: persistence.storageClass
           value: general
         - name: persistence.size

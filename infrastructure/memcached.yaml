@@ -7,14 +7,11 @@ spec:
   project: default
   source:
     repoURL: 'https://charts.bitnami.com/bitnami'
-    targetRevision: 6.5.5
+    targetRevision: 7.0.0 # <--- MAJOR UPGRADE (was 6.5.5)
     chart: memcached
     helm:
       parameters:
-        # --- ADD THIS TO FIX IMAGE ERROR ---
-        - name: image.tag
-          value: "1.6-debian-11"
-        # -----------------------------------
+        # Remove the 'image.tag' override.
         - name: architecture
           value: standalone
         - name: auth.enabled
