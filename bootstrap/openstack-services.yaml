@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openstack-services
+  namespace: argocd
+spec:
+  project: default
+  source:
+    # ⚠️ IMPORTANT: Replace with YOUR actual GitHub Repo URL
+    repoURL: 'https://github.com/osm1n/talos-openstack-gitops.git' 
+    targetRevision: HEAD
+    path: openstack  # <--- This is the folder where you put keystone.yaml
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: argocd # The Application resource lives in argocd, but it deploys to openstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
