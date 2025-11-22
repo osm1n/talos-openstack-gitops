@@ -12,7 +12,7 @@ spec:
     helm:
       releaseName: rabbitmq
       values: |
-        replicaCount: 1
+        replicaCount: 3
         auth:
           password: password
           erlangCookie: changemeplease
@@ -26,10 +26,10 @@ spec:
             enabled: true
         destination:
           server: "https://kubernetes.default.svc"
-          namespace: openstack
+          namespace: rabbitmq
   destination:
     server: https://kubernetes.default.svc
-    namespace: openstack
+    namespace: rabbitmq
   syncPolicy:
     automated:
       prune: true
