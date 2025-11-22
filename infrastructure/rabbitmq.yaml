@@ -1,0 +1,55 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rabbitmq
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://charts.bitnami.com/bitnami'
+    chart: rabbitmq
+    targetRevision: 14.6.6
+    helm:
+      parameters:
+        # --- 1. Bypass Docker Hub (Use AWS Mirror) ---
+        - name: global.imageRegistry
+          value: "public.ecr.aws"
+        - name: image.registry
+          value: "public.ecr.aws"
+        - name: image.repository
+          value: "bitnami/rabbitmq"
+        - name: image.tag
+          value: "3.12-debian-11"
+          
+        # --- 2. Fix Init Container ---
+        - name: volumePermissions.enabled
+          value: "true"
+        - name: volumePermissions.image.registry
+          value: "public.ecr.aws"
+        - name: volumePermissions.image.repository
+          value: "bitnami/os-shell"
+        - name: volumePermissions.image.tag
+          value: "latest"
+
+        # --- 3. Configuration ---
+        - name: auth.username
+          value: "openstack"
+        - name: auth.password
+          value: "password"
+        - name: auth.erlangCookie
+          value: "secretcookie"
+        - name: replicaCount
+          value: "1"
+        - name: persistence.storageClass
+          value: "general"
+        - name: persistence.size
+          value: "5Gi"
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: openstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
