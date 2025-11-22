@@ -4,21 +4,30 @@ metadata:
   name: rabbitmq
   namespace: argocd
 spec:
-  project: default
+  # ... (keep source/repo info) ...
   source:
     repoURL: 'https://charts.bitnami.com/bitnami'
     targetRevision: 15.0.0
     chart: rabbitmq
     helm:
       parameters:
-        # --- FORCE LATEST ---
+        # --- MAIN IMAGE ---
         - name: image.registry
           value: "docker.io"
         - name: image.repository
           value: "bitnami/rabbitmq"
         - name: image.tag
           value: "latest"
-        # --------------------
+        # --- INIT CONTAINER IMAGE (ADD THIS) ---
+        - name: volumePermissions.enabled
+          value: "true"
+        - name: volumePermissions.image.registry
+          value: "docker.io"
+        - name: volumePermissions.image.repository
+          value: "bitnami/os-shell"
+        - name: volumePermissions.image.tag
+          value: "latest"
+        # ---------------------------------------
         - name: persistence.storageClass
           value: general
         - name: persistence.size
