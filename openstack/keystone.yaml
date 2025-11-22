@@ -6,20 +6,22 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://openstack-k8s-operators.github.io/openstack-helm-charts'
-    targetRevision: 0.2.6
+    # --- FIX: OFFICIAL REPO URL ---
+    repoURL: 'https://tarballs.opendev.org/openstack/openstack-helm'
     chart: keystone
+    targetRevision: 2024.2.4 # Stable version
+    # ------------------------------
     helm:
       parameters:
-        # --- Database Connection ---
+        # --- Database ---
         - name: conf.keystone.database.connection
           value: mysql+pymysql://keystone:password@mariadb.openstack.svc.cluster.local/keystone
         
-        # --- RabbitMQ Connection ---
+        # --- RabbitMQ ---
         - name: conf.keystone.oslo_messaging_rabbit.transport_url
           value: rabbit://openstack:password@rabbitmq.openstack.svc.cluster.local:5672/
         
-        # --- Memcached Connection ---
+        # --- Memcached ---
         - name: conf.keystone.cache.backend
           value: dogpile.cache.memcached
         - name: conf.keystone.cache.memcache_servers
@@ -29,7 +31,7 @@ spec:
         - name: conf.keystone.DEFAULT.admin_token
           value: password
         
-        # --- Bootstrap (Creates Admin User) ---
+        # --- Bootstrap Script ---
         - name: bootstrap.enabled
           value: "true"
         - name: bootstrap.script
