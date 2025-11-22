@@ -26,7 +26,7 @@ spec:
             enabled: true
         destination:
           server: "https://kubernetes.default.svc"
-          namespace: openstack
+          namespace: rabbitmq
   destination:
     server: https://kubernetes.default.svc
     namespace: rabbitmq
