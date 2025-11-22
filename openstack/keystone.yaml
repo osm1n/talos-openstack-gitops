@@ -6,32 +6,53 @@ metadata:
 spec:
   project: default
   source:
-    # --- FIX: OFFICIAL REPO URL ---
     repoURL: 'https://tarballs.opendev.org/openstack/openstack-helm'
     chart: keystone
-    targetRevision: 2024.2.4 # Stable version
-    # ------------------------------
+    targetRevision: 2024.2.4
     helm:
       parameters:
-        # --- Database ---
+        # --- 1. FORCE JOB CREATION (Fixes "dependency not found") ---
+        - name: manifests.job_db_init
+          value: "true"
+        - name: manifests.job_db_sync
+          value: "true"
+        - name: manifests.job_bootstrap
+          value: "true"
+        - name: manifests.job_credential_setup
+          value: "true"
+        - name: manifests.job_fernet_setup
+          value: "true"
+
+        # --- 2. CONNECTIONS ---
         - name: conf.keystone.database.connection
           value: mysql+pymysql://keystone:password@mariadb.openstack.svc.cluster.local/keystone
-        
-        # --- RabbitMQ ---
         - name: conf.keystone.oslo_messaging_rabbit.transport_url
           value: rabbit://openstack:password@rabbitmq.openstack.svc.cluster.local:5672/
-        
-        # --- Memcached ---
         - name: conf.keystone.cache.backend
           value: dogpile.cache.memcached
         - name: conf.keystone.cache.memcache_servers
           value: memcached.openstack.svc.cluster.local:11211
-        
-        # --- Secrets ---
         - name: conf.keystone.DEFAULT.admin_token
           value: password
-        
-        # --- Bootstrap Script ---
+
+        # --- 3. LAB RESOURCE TUNING (Prevents "Pending" state) ---
+        - name: pod.replicas.api
+          value: "1"
+        - name: pod.resources.api.requests.memory
+          value: "512Mi"
+        - name: pod.resources.api.requests.cpu
+          value: "100m"
+        - name: pod.resources.api.limits.memory
+          value: "1024Mi"
+        - name: pod.resources.api.limits.cpu
+          value: "1000m"
+        # Reduce job resources too
+        - name: pod.resources.jobs.bootstrap.requests.memory
+          value: "128Mi"
+        - name: pod.resources.jobs.bootstrap.requests.cpu
+          value: "100m"
+
+        # --- 4. BOOTSTRAP SCRIPT ---
         - name: bootstrap.enabled
           value: "true"
         - name: bootstrap.script
