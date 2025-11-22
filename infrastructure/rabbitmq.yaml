@@ -4,22 +4,29 @@ metadata:
   name: rabbitmq
   namespace: argocd
 spec:
-  # ... (keep source/repo info) ...
+  project: default
   source:
     repoURL: 'https://charts.bitnami.com/bitnami'
     targetRevision: 15.0.0
     chart: rabbitmq
     helm:
       parameters:
-        # --- MAIN IMAGE (Use AWS Mirror) ---
+        # ------------------------------------------------
+        # 1. MAIN IMAGE CONFIG (Use AWS Mirror)
+        # ------------------------------------------------
         - name: image.registry
           value: "public.ecr.aws"
         - name: image.repository
           value: "bitnami/rabbitmq"
         - name: image.tag
           value: "latest"
-        
-        # --- INIT CONTAINER (Use AWS Mirror) ---
+        - name: image.pullPolicy
+          value: "Always"
+
+        # ------------------------------------------------
+        # 2. INIT CONTAINER CONFIG (Use AWS Mirror)
+        # This is likely the part that was failing before.
+        # ------------------------------------------------
         - name: volumePermissions.enabled
           value: "true"
         - name: volumePermissions.image.registry
@@ -28,8 +35,12 @@ spec:
           value: "bitnami/os-shell"
         - name: volumePermissions.image.tag
           value: "latest"
-        
-        # --- STANDARD CONFIG ---
+        - name: volumePermissions.image.pullPolicy
+          value: "Always"
+
+        # ------------------------------------------------
+        # 3. APPLICATION CONFIG
+        # ------------------------------------------------
         - name: persistence.storageClass
           value: general
         - name: persistence.size
@@ -37,8 +48,7 @@ spec:
         - name: auth.username
           value: openstack
         - name: auth.password
-          value: password    
-
+          value: password
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: openstack
@@ -46,3 +56,5 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
