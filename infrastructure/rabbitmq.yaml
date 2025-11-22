@@ -14,7 +14,7 @@ spec:
       values: |
         replicaCount: 3
         auth:
-          password: blablabla
+          password: password
           erlangCookie: changemeplease
         tls:
           enabled: true
