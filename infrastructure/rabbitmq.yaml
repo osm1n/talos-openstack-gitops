@@ -12,9 +12,9 @@ spec:
     helm:
       releaseName: rabbitmq
       values: |
-        replicaCount: 1
+        replicaCount: 3
         auth:
-          password: password
+          password: blablabla
           erlangCookie: changemeplease
         tls:
           enabled: true
@@ -26,7 +26,7 @@ spec:
         extraPlugins: "rabbitmq_delayed_message_exchange"
   destination:
     server: https://kubernetes.default.svc
-    namespace: openstack
+    namespace: rabbitmq
   syncPolicy:
     automated:
       prune: true
