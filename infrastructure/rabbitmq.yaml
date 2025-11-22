@@ -8,26 +8,31 @@ spec:
   source:
     chart: rabbitmq
     repoURL: https://charts.bitnami.com/bitnami
-    targetRevision: 14.6.6  # <--- KEEPING YOUR WORKING VERSION
+    targetRevision: 14.6.6
     helm:
       releaseName: rabbitmq
       values: |
-        replicaCount: 1  # Changed to 1 (3 is heavy for your lab)
+        replicaCount: 1
         auth:
-          username: openstack
-          password: password  # <--- UPDATED TO MATCH KEYSTONE
-          erlangCookie: secretcookie
-        persistence:
-          storageClass: general
-          size: 5Gi
+          password: password
+          erlangCookie: changemeplease
+        tls:
+          enabled: true
+        communityPlugins: "https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/3.8.9/rabbitmq_delayed_message_exchange-3.8.9-0199d11c.ez"
+        extraPlugins: "rabbitmq_delayed_message_exchange"
         metrics:
-          enabled: false # Save RAM
+          enabled: true
+          serviceMonitor:
+            enabled: true
+        destination:
+          server: "https://kubernetes.default.svc"
+          namespace: rabbitmq
   destination:
     server: https://kubernetes.default.svc
-    namespace: openstack # Ensure it is in openstack namespace
+    namespace: openstack
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
+      - CreateNamespace=true   
