@@ -29,7 +29,7 @@ spec:
           namespace: openstack
   destination:
     server: https://kubernetes.default.svc
-    namespace: openstack
+    namespace: rabbitmq
   syncPolicy:
     automated:
       prune: true
