@@ -6,55 +6,33 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://charts.bitnami.com/bitnami'
-    targetRevision: 15.0.0
     chart: rabbitmq
+    repoURL: https://charts.bitnami.com/bitnami
+    targetRevision: 14.6.6
     helm:
-      parameters:
-        # ------------------------------------------------
-        # 1. MAIN IMAGE CONFIG (Use AWS Mirror)
-        # ------------------------------------------------
-        - name: image.registry
-          value: "public.ecr.aws"
-        - name: image.repository
-          value: "bitnami/rabbitmq"
-        - name: image.tag
-          value: "latest"
-        - name: image.pullPolicy
-          value: "Always"
-
-        # ------------------------------------------------
-        # 2. INIT CONTAINER CONFIG (Use AWS Mirror)
-        # This is likely the part that was failing before.
-        # ------------------------------------------------
-        - name: volumePermissions.enabled
-          value: "true"
-        - name: volumePermissions.image.registry
-          value: "public.ecr.aws"
-        - name: volumePermissions.image.repository
-          value: "bitnami/os-shell"
-        - name: volumePermissions.image.tag
-          value: "latest"
-        - name: volumePermissions.image.pullPolicy
-          value: "Always"
-
-        # ------------------------------------------------
-        # 3. APPLICATION CONFIG
-        # ------------------------------------------------
-        - name: persistence.storageClass
-          value: general
-        - name: persistence.size
-          value: 5Gi
-        - name: auth.username
-          value: openstack
-        - name: auth.password
-          value: password
+      releaseName: rabbitmq
+      values: |
+        replicaCount: 3
+        auth:
+          password: blablabla
+          erlangCookie: changemeplease
+        tls:
+          enabled: true
+        communityPlugins: "https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/3.8.9/rabbitmq_delayed_message_exchange-3.8.9-0199d11c.ez"
+        extraPlugins: "rabbitmq_delayed_message_exchange"
+        metrics:
+          enabled: true
+          serviceMonitor:
+            enabled: true
+        destination:
+          server: "https://kubernetes.default.svc"
+          namespace: rabbitmq
   destination:
-    server: 'https://kubernetes.default.svc'
-    namespace: openstack
+    server: https://kubernetes.default.svc
+    namespace: rabbitmq
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
+      - CreateNamespace=true   
